@@ -46,6 +46,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="KSPTSEndOfFrameManager.cs" />
     <Compile Include="KSPTSEntryPoint.cs" />
     <Compile Include="KSPTSThreadController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
