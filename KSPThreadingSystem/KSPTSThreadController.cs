@@ -38,17 +38,25 @@ namespace KSPThreadingSystem
 
         void Update()
         {
-            if(HighLogic.LoadedScene != lastScene)
+
+            //Debug.Log("Test Timing, KSPTSController");
+            CheckIfEOFManagerNeedsReseting();
+        }
+
+        //This will trigger a reset if the Scene changes or if the number of GOs change.
+        void CheckIfEOFManagerNeedsReseting()
+        {
+            if (HighLogic.LoadedScene != lastScene)
             {
                 lastScene = HighLogic.LoadedScene;
                 Debug.Log("KSPTSThreadController reporting; scene: " + HighLogic.LoadedScene.ToString());
                 ResetEndOfFrameManager();
             }
 
-            if(frameCount > 300)
+            if (frameCount > 90)
             {
                 int tmpGOCount = Resources.FindObjectsOfTypeAll<GameObject>().Length;
-                if(tmpGOCount != lastGOCount)
+                if (tmpGOCount != lastGOCount)
                 {
                     lastGOCount = tmpGOCount;
                     ResetEndOfFrameManager();
@@ -57,6 +65,10 @@ namespace KSPThreadingSystem
             }
             frameCount++;
         }
+
+        #region EOFManagerResets
+
+        //These are used to destroy and recreate the EOFManager that handles threads that must end in the same frame they started in
 
         void ResetEndOfFrameManager(ShipConstruct v)
         {
@@ -80,5 +92,7 @@ namespace KSPThreadingSystem
 
             endOfFrameManager = endOfFrameManagerGO.GetComponent<KSPTSEndOfFrameManager>();
         }
+
+        #endregion
     }
 }

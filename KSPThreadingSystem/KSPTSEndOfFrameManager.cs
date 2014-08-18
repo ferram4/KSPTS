@@ -10,5 +10,10 @@ namespace KSPThreadingSystem
         {
             Debug.Log("KSPTSEndOfFrameManager has been created");
         }
+
+        void Update()
+        {
+            //Debug.Log("Test Timing, KSPTSEndOfFrameManager");
+        }
     }
 }
