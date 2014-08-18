@@ -10,7 +10,12 @@ namespace KSPThreadingSystem
         public static KSPTSThreadController instance = null;
         public static bool instanceExists = false;
 
+        //Updating values
         private GameScenes lastScene = GameScenes.LOADING;
+        private int lastGOCount = 0;
+        private int frameCount = 0;
+
+        private GameObject endOfFrameManagerGO = null;
         private KSPTSEndOfFrameManager endOfFrameManager = null;
         private List<Thread> threads = null;
 
@@ -39,6 +44,18 @@ namespace KSPThreadingSystem
                 Debug.Log("KSPTSThreadController reporting; scene: " + HighLogic.LoadedScene.ToString());
                 ResetEndOfFrameManager();
             }
+
+            if(frameCount > 300)
+            {
+                int tmpGOCount = Resources.FindObjectsOfTypeAll<GameObject>().Length;
+                if(tmpGOCount != lastGOCount)
+                {
+                    lastGOCount = tmpGOCount;
+                    ResetEndOfFrameManager();
+                }
+                frameCount = 0;
+            }
+            frameCount++;
         }
 
         void ResetEndOfFrameManager(ShipConstruct v)
@@ -53,9 +70,15 @@ namespace KSPThreadingSystem
 
         void ResetEndOfFrameManager()
         {
-            endOfFrameManager = null;
             // TODO: Implement stopping of all threads to allow re-construction of KSPTSEndOfFrameManager
-            endOfFrameManager = new KSPTSEndOfFrameManager();
+
+            GameObject.Destroy(endOfFrameManagerGO);
+            endOfFrameManager = null;
+
+            endOfFrameManagerGO = new GameObject();
+            endOfFrameManagerGO.AddComponent<KSPTSEndOfFrameManager>();
+
+            endOfFrameManager = endOfFrameManagerGO.GetComponent<KSPTSEndOfFrameManager>();
         }
     }
 }
