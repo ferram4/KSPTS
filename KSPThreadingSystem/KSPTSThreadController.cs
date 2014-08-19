@@ -63,7 +63,29 @@ namespace KSPThreadingSystem
 
         internal void EndUpdate()
         {
-            while (_updateThreadPool.busy) ;    //Wait for threadpool to finish
+            while(_updatePostFunctions.Count > 0)
+            {
+                KSPTSParametrizedPostFunction tmp;
+                lock(locker)
+                    tmp = _updatePostFunctions.Dequeue();
+
+                if (tmp.postFunction != null)
+                    tmp.postFunction(tmp.parameter);
+            }
+
+            while (_updateThreadPool.IsBusy())
+            {
+                while (_updatePostFunctions.Count > 0)
+                {
+                    KSPTSParametrizedPostFunction tmp;
+                    lock (locker)
+                        tmp = _updatePostFunctions.Dequeue();
+
+                    if (tmp.postFunction != null)
+                        tmp.postFunction(tmp.parameter);
+                }
+                Thread.Sleep(0);
+            }
         }
 
         internal void EnqueuePostFunction(Action<object> postFunction, object parameter)

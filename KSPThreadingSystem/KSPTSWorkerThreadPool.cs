@@ -13,7 +13,7 @@ namespace KSPThreadingSystem
         private Queue<KSPTSParametrizedTask> _tasks = new Queue<KSPTSParametrizedTask>();
         private readonly object locker = new object();
 
-        internal bool busy;
+        private bool busy;
 
         internal KSPTSWorkerThreadPool() : this(Environment.ProcessorCount) { }
 
@@ -33,6 +33,16 @@ namespace KSPThreadingSystem
                 _tasks.Enqueue(_paraAction);
                 Monitor.Pulse(locker);
             }
+        }
+
+        internal bool IsBusy()
+        {
+            bool value = false;
+            lock(locker)
+            {
+                value = busy;
+            }
+            return value;
         }
 
         private void DoTasks()
