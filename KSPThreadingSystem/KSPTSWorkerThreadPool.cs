@@ -5,12 +5,12 @@ using System.Threading;
 namespace KSPThreadingSystem
 {
     /// <summary>
-    /// This class handles all the worker threads used by KSPTS.  Actions are queued up, and then are given to workers as they become available
+    /// This class handles all the worker threads used by KSPTS.  Actions are queued up, and then workers dequeue and execute those actions until none remain
     /// </summary>
     internal class KSPTSWorkerThreadPool
     {
         private Thread[] _threads;
-        private Queue<Action> _tasks = new Queue<Action>();
+        private Queue<KSPTSParametrizedFunc> _tasks = new Queue<KSPTSParametrizedFunc>();
         private readonly object locker = new object();
 
         internal bool busy;
@@ -25,11 +25,12 @@ namespace KSPThreadingSystem
                 (_threads[i] = new Thread(DoTasks)).Start();
         }
 
-        internal void EnqueueNewTask(Action newTask)
+        internal void EnqueueNewTask(Func<object, object> newTask, object newParameter)
         {
+            KSPTSParametrizedFunc _paraAction = new KSPTSParametrizedFunc(newTask, newParameter);
             lock(locker)
             {
-                _tasks.Enqueue(newTask);
+                _tasks.Enqueue(_paraAction);
                 Monitor.Pulse(locker);
             }
         }
@@ -38,7 +39,7 @@ namespace KSPThreadingSystem
         {
             while(true)
             {
-                Action currentTask = null;
+                KSPTSParametrizedFunc currentTask = null;
 
                 lock (locker)
                 {
@@ -51,10 +52,10 @@ namespace KSPThreadingSystem
                     currentTask = _tasks.Dequeue();
                 }
 
-                if (currentTask == null)
+                if (currentTask.action == null)
                     return;
 
-                currentTask();
+                currentTask.action(currentTask.parameter);
             }
         }
     }

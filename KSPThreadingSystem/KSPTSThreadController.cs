@@ -19,7 +19,7 @@ namespace KSPThreadingSystem
 
         private KSPTSWorkerThreadPool _updateThreadPool;
 
-        internal KSPTSRegisteredActions registeredActions = new KSPTSRegisteredActions();
+        internal KSPTSRegisteredTasks registeredTasks = new KSPTSRegisteredTasks();
 
         internal KSPTSThreadController()
         {
@@ -43,10 +43,14 @@ namespace KSPThreadingSystem
         {
             CheckIfEOFManagerNeedsReseting();
 
-            List<Action> tmpActionList = registeredActions.inLoop_Update_Actions;
+            List<KSPTSTaskGroup> tmpTaskGroupList = registeredTasks.inLoop_Update_Actions;
 
-            for (int i = 0; i < tmpActionList.Count; i++)
-                _updateThreadPool.EnqueueNewTask(tmpActionList[i]);
+            for (int i = 0; i < tmpTaskGroupList.Count; i++)
+            {
+                KSPTSTaskGroup tmpTaskGroup = tmpTaskGroupList[i];
+                object tmpObject = tmpTaskGroup.preFunction();
+                _updateThreadPool.EnqueueNewTask(tmpTaskGroup.threadedTask, tmpObject);
+            }
         }
 
         internal void EndUpdate()
@@ -105,27 +109,5 @@ namespace KSPThreadingSystem
         }
 
         #endregion
-
-        internal class KSPTSRegisteredActions
-        {
-            internal KSPTSRegisteredActions()
-            {
-                inLoop_Update_Actions = new List<Action>();
-                inLoop_LateUpdate_Actions = new List<Action>();
-                inLoop_FixedUpdate_Actions = new List<Action>();
-
-                acrossLoop_Update_Actions = new List<Action>();
-                acrossLoop_LateUpdate_Actions = new List<Action>();
-                acrossLoop_FixedUpdate_Actions = new List<Action>();
-            }
-
-            internal List<Action> inLoop_Update_Actions;
-            internal List<Action> inLoop_LateUpdate_Actions;
-            internal List<Action> inLoop_FixedUpdate_Actions;
-
-            internal List<Action> acrossLoop_Update_Actions;
-            internal List<Action> acrossLoop_LateUpdate_Actions;
-            internal List<Action> acrossLoop_FixedUpdate_Actions;
-        }
     }
 }
