@@ -50,6 +50,7 @@
     <Compile Include="KSPTSEndOfFrameManager.cs" />
     <Compile Include="KSPTSEntryPoint.cs" />
     <Compile Include="KSPTSThreadController.cs" />
+    <Compile Include="KSPTSWorkerThreadPool.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

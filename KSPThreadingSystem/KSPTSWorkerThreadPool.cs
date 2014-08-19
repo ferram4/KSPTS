@@ -1,0 +1,53 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Threading;
+
+namespace KSPThreadingSystem
+{
+    public class KSPTSWorkerThreadPool
+    {
+        private Thread[] _threads;
+        private Queue<Action> _tasks = new Queue<Action>();
+
+        private readonly object locker = new object();
+
+        public KSPTSWorkerThreadPool() : this(Environment.ProcessorCount) { }
+
+        public KSPTSWorkerThreadPool(int numThreads)
+        {
+            _threads = new Thread[numThreads];
+
+            for (int i = 0; i < numThreads; i++)
+                (_threads[i] = new Thread(DoTasks)).Start();
+        }
+
+        public void EnqueueNewTask(Action newTask)
+        {
+            lock(locker)
+            {
+                _tasks.Enqueue(newTask);
+                Monitor.Pulse(locker);
+            }
+        }
+
+        private void DoTasks()
+        {
+            while(true)
+            {
+                Action currentTask = null;
+
+                lock (locker)
+                {
+                    while (_tasks.Count == 0)
+                        Monitor.Wait(locker);
+                    currentTask = _tasks.Dequeue();
+                }
+
+                if (currentTask == null)
+                    return;
+
+                currentTask();
+            }
+        }
+    }
+}

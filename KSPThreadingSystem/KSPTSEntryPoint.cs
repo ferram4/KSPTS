@@ -4,6 +4,9 @@ using UnityEngine;
 
 namespace KSPThreadingSystem
 {
+    /// <summary>
+    /// Uses KSPAddon to create GameObject that KSPTSThreadController is attached to.  Only ever needs to run once, at startup
+    /// </summary>
     [KSPAddon(KSPAddon.Startup.Instantly, true)]
     public class KSPTSEntryPoint : MonoBehaviour
     {

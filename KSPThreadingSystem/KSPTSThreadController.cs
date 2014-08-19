@@ -17,13 +17,12 @@ namespace KSPThreadingSystem
 
         private GameObject endOfFrameManagerGO = null;
         private KSPTSEndOfFrameManager endOfFrameManager = null;
-        private List<Thread> threads = null;
+        //private Thread[] workerThreads = null;
 
         public KSPTSThreadController()
         {
             Debug.Log("KSPTSThreadController Created");
             instance = this;
-            threads = new List<Thread>();
         }
 
         void Start()
@@ -34,6 +33,8 @@ namespace KSPThreadingSystem
             GameEvents.onVesselGoOnRails.Add(ResetEndOfFrameManager);
             GameEvents.onVesselWasModified.Add(ResetEndOfFrameManager);
             GameEvents.onEditorShipModified.Add(ResetEndOfFrameManager);
+            Debug.Log("KSPTSThreadController initializing worker thread array: " + Environment.ProcessorCount + " threads allotted");
+            //workerThreads = new Thread[Environment.ProcessorCount];
         }
 
         void Update()
