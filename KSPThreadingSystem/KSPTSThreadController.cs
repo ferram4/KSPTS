@@ -18,6 +18,9 @@ namespace KSPThreadingSystem
         private KSPTSEndOfFrameManager endOfFrameManager = null;
 
         private KSPTSWorkerThreadPool _updateThreadPool;
+        private Queue<KSPTSParametrizedPostFunction> _updatePostFunctions;
+
+        private readonly object locker = new object();
 
         internal KSPTSRegisteredTasks registeredTasks = new KSPTSRegisteredTasks();
 
@@ -37,19 +40,24 @@ namespace KSPThreadingSystem
             GameEvents.onEditorShipModified.Add(ResetEndOfFrameManager);
 
             _updateThreadPool = new KSPTSWorkerThreadPool((int)(Environment.ProcessorCount * 0.5));
+            _updatePostFunctions = new Queue<KSPTSParametrizedPostFunction>();
         }
 
         void Update()
         {
-            CheckIfEOFManagerNeedsReseting();
+            CheckIfEOFManagerNeedsResetting();
 
             List<KSPTSTaskGroup> tmpTaskGroupList = registeredTasks.inLoop_Update_Actions;
 
             for (int i = 0; i < tmpTaskGroupList.Count; i++)
             {
                 KSPTSTaskGroup tmpTaskGroup = tmpTaskGroupList[i];
-                object tmpObject = tmpTaskGroup.preFunction();
-                _updateThreadPool.EnqueueNewTask(tmpTaskGroup.threadedTask, tmpObject);
+                object tmpObject = null;
+
+                if (tmpTaskGroup.preFunction != null)
+                    tmpObject = tmpTaskGroup.preFunction();
+
+                _updateThreadPool.EnqueueNewTask(tmpTaskGroup.threadedTask, tmpObject, tmpTaskGroup.postFunction);
             }
         }
 
@@ -58,8 +66,17 @@ namespace KSPThreadingSystem
             while (_updateThreadPool.busy) ;    //Wait for threadpool to finish
         }
 
+        internal void EnqueuePostFunction(Action<object> postFunction, object parameter)
+        {
+            KSPTSParametrizedPostFunction tmpPostFunc = new KSPTSParametrizedPostFunction(postFunction, parameter);
+            lock(locker)
+            {
+                _updatePostFunctions.Enqueue(tmpPostFunc);
+            }
+        }
+
         //This will trigger a reset if the Scene changes or if the number of GOs change.
-        void CheckIfEOFManagerNeedsReseting()
+        void CheckIfEOFManagerNeedsResetting()
         {
             if (HighLogic.LoadedScene != lastScene)
             {
