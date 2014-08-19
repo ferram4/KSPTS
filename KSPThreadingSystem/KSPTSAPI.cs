@@ -152,14 +152,4 @@ namespace KSPThreadingSystem
             return false;
         }
     }
-
-    public enum KSPTSThreadingGroups
-    {
-        IN_LOOP_UPDATE,
-        IN_LOOP_LATE_UPDATE,
-        IN_LOOP_FIXED_UPDATE,
-        ACROSS_LOOP_UPDATE,
-        ACROSS_LOOP_LATE_UPDATE,
-        ACROSS_LOOP_FIXED_UPDATE
-    }
 }

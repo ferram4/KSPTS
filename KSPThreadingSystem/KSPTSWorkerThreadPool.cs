@@ -10,7 +10,7 @@ namespace KSPThreadingSystem
     internal class KSPTSWorkerThreadPool
     {
         private Thread[] _threads;
-        private Queue<KSPTSParametrizedTask> _tasks = new Queue<KSPTSParametrizedTask>();
+        private KSPTSPrioritizedQueue _tasks = new KSPTSPrioritizedQueue();
         private readonly object locker = new object();
 
         private bool busy;
@@ -25,13 +25,21 @@ namespace KSPThreadingSystem
                 (_threads[i] = new Thread(DoTasks)).Start();
         }
 
-        internal void EnqueueNewTask(Func<object, object> newTask, object newParameter, Action<object> newPostFunction)
+        internal void EnqueueNewTask(Func<object, object> newTask, object newParameter, Action<object> newPostFunction, KSPTSThreadingGroups group)
         {
             KSPTSParametrizedTask _paraAction = new KSPTSParametrizedTask(newTask, newParameter, newPostFunction);
             lock(locker)
             {
-                _tasks.Enqueue(_paraAction);
+                _tasks.Enqueue(_paraAction, group);
                 Monitor.Pulse(locker);
+            }
+        }
+
+        internal void SetUrgent(KSPTSThreadingGroups urgentGroup)
+        {
+            lock (locker)
+            {
+                _tasks.SetUrgent(urgentGroup);
             }
         }
 
@@ -54,7 +62,7 @@ namespace KSPThreadingSystem
                 lock (locker)
                 {
                     busy = false;
-                    while (_tasks.Count == 0)
+                    while (!_tasks.hasTasks)
                     {
                         Monitor.Wait(locker);
                     }
@@ -63,7 +71,7 @@ namespace KSPThreadingSystem
                 }
 
                 if (currentTask.action == null)
-                    return;
+                    continue;
 
                 object postFuncParam = currentTask.action(currentTask.parameter);
 

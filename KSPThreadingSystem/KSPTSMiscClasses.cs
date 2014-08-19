@@ -64,4 +64,17 @@ namespace KSPThreadingSystem
             this.postFunction = postFunction;
         }
     }
+
+    /// <summary>
+    /// Enum used to specify threading groups and priority; arranged from highest priority to lowest
+    /// </summary>
+    public enum KSPTSThreadingGroups
+    {
+        IN_LOOP_FIXED_UPDATE = 0,
+        ACROSS_LOOP_FIXED_UPDATE = 1,
+        IN_LOOP_UPDATE = 2,
+        IN_LOOP_LATE_UPDATE = 3,
+        ACROSS_LOOP_UPDATE = 4,
+        ACROSS_LOOP_LATE_UPDATE = 5
+    }
 }

@@ -39,7 +39,7 @@ namespace KSPThreadingSystem
             GameEvents.onVesselWasModified.Add(ResetEndOfFrameManager);
             GameEvents.onEditorShipModified.Add(ResetEndOfFrameManager);
 
-            _updateThreadPool = new KSPTSWorkerThreadPool((int)(Environment.ProcessorCount * 0.5));
+            _updateThreadPool = new KSPTSWorkerThreadPool((Environment.ProcessorCount));
             _updatePostFunctions = new Queue<KSPTSParametrizedPostFunction>();
         }
 
@@ -57,12 +57,14 @@ namespace KSPThreadingSystem
                 if (tmpTaskGroup.preFunction != null)
                     tmpObject = tmpTaskGroup.preFunction();
 
-                _updateThreadPool.EnqueueNewTask(tmpTaskGroup.threadedTask, tmpObject, tmpTaskGroup.postFunction);
+                _updateThreadPool.EnqueueNewTask(tmpTaskGroup.threadedTask, tmpObject, tmpTaskGroup.postFunction, KSPTSThreadingGroups.IN_LOOP_UPDATE);
             }
         }
 
         internal void EndUpdate()
         {
+            _updateThreadPool.SetUrgent(KSPTSThreadingGroups.IN_LOOP_UPDATE);
+
             while(_updatePostFunctions.Count > 0)
             {
                 KSPTSParametrizedPostFunction tmp;
