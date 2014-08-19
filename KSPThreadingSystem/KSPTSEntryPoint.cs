@@ -13,7 +13,7 @@ namespace KSPThreadingSystem
         void Start()
         {
             if (KSPTSThreadController.instanceExists)
-                Debug.LogWarning("KSPTS: Ordered by KSP to create second KSPTSThreadController; disregarding order as unnecessary");
+                Debug.LogWarning("Second KSPTSEntryPoint created after KSPTS has been initialized; preventing initialization code from running");
             else
             {
                 Debug.Log("Initializing KSPThreadingSystem");

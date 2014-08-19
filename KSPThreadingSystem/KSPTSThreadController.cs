@@ -5,21 +5,19 @@ using UnityEngine;
 
 namespace KSPThreadingSystem
 {
-    public class KSPTSThreadController : MonoBehaviour
+    internal class KSPTSThreadController : MonoBehaviour
     {
-        public static KSPTSThreadController instance = null;
-        public static bool instanceExists = false;
+        internal static KSPTSThreadController instance = null;
+        internal static bool instanceExists = false;
 
-        //Updating values
         private GameScenes lastScene = GameScenes.LOADING;
         private int lastGOCount = 0;
         private int frameCount = 0;
 
         private GameObject endOfFrameManagerGO = null;
         private KSPTSEndOfFrameManager endOfFrameManager = null;
-        //private Thread[] workerThreads = null;
 
-        public KSPTSThreadController()
+        internal KSPTSThreadController()
         {
             Debug.Log("KSPTSThreadController Created");
             instance = this;
@@ -34,14 +32,16 @@ namespace KSPThreadingSystem
             GameEvents.onVesselWasModified.Add(ResetEndOfFrameManager);
             GameEvents.onEditorShipModified.Add(ResetEndOfFrameManager);
             Debug.Log("KSPTSThreadController initializing worker thread array: " + Environment.ProcessorCount + " threads allotted");
-            //workerThreads = new Thread[Environment.ProcessorCount];
         }
 
         void Update()
         {
-
-            //Debug.Log("Test Timing, KSPTSController");
             CheckIfEOFManagerNeedsReseting();
+        }
+
+        internal void EndUpdate()
+        {
+
         }
 
         //This will trigger a reset if the Scene changes or if the number of GOs change.

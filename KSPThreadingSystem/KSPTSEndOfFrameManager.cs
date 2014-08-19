@@ -4,15 +4,16 @@ using UnityEngine;
 
 namespace KSPThreadingSystem
 {
-    public class KSPTSEndOfFrameManager : MonoBehaviour
+    internal class KSPTSEndOfFrameManager : MonoBehaviour
     {
-        public KSPTSEndOfFrameManager()
+        internal KSPTSEndOfFrameManager()
         {
             Debug.Log("KSPTSEndOfFrameManager has been created");
         }
 
         void Update()
         {
+            KSPTSThreadController.instance.EndUpdate();
             //Debug.Log("Test Timing, KSPTSEndOfFrameManager");
         }
     }

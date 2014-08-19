@@ -4,16 +4,18 @@ using System.Threading;
 
 namespace KSPThreadingSystem
 {
-    public class KSPTSWorkerThreadPool
+    /// <summary>
+    /// This class handles all the worker threads used by KSPTS.  Actions are queued up, and then are given to workers as they become available
+    /// </summary>
+    internal class KSPTSWorkerThreadPool
     {
         private Thread[] _threads;
         private Queue<Action> _tasks = new Queue<Action>();
-
         private readonly object locker = new object();
 
-        public KSPTSWorkerThreadPool() : this(Environment.ProcessorCount) { }
+        internal KSPTSWorkerThreadPool() : this(Environment.ProcessorCount) { }
 
-        public KSPTSWorkerThreadPool(int numThreads)
+        internal KSPTSWorkerThreadPool(int numThreads)
         {
             _threads = new Thread[numThreads];
 
@@ -21,7 +23,7 @@ namespace KSPThreadingSystem
                 (_threads[i] = new Thread(DoTasks)).Start();
         }
 
-        public void EnqueueNewTask(Action newTask)
+        internal void EnqueueNewTask(Action newTask)
         {
             lock(locker)
             {
