@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using KSPThreadingSystem;
 
 namespace KSPTSDemo
 {
     [KSPAddon(KSPAddon.Startup.MainMenu, false)]
-    public class KSPTSDemo : MonoBehaviour
+    public class KSPTSDemoController : MonoBehaviour
     {
-        int[] array;
+        KSPTSDemoObject[] array;
 
         const int c = 15;
         readonly object locker = new object();
@@ -15,22 +16,52 @@ namespace KSPTSDemo
         void Start()
         {
             Debug.Log("Starting KSPTS Demo");
-            array = new int[c];
+            array = new KSPTSDemoObject[c];
             for (int i = 0; i < c; i++)
-                array[i] = i;
+                array[i] = new KSPTSDemoObject(i);
         }
 
-        void Update()
+        /*void Update()
         {
             string s = "";
             for (int i = 0; i < c; i++)
                 s += "Index " + i + ": " + array[i];
 
             Debug.Log(s);
+        }*/
+    }
+
+    public class KSPTSDemoObject
+    {
+        int val;
+        System.Random rand;
+
+        public KSPTSDemoObject(int val)
+        {
+            this.val = val;
+            rand = new System.Random(val * System.DateTime.Now.Millisecond);
+
+            KSPTSAPI.RegisterNewThreadTask(KSPTSThreadingGroups.IN_LOOP_UPDATE, PreFunction, ThreadedTask, PostFunction);
         }
 
-        void CalculateRandom()
+        public object PreFunction()
         {
+            Debug.Log("Running PreFunction");
+            return val;
+        }
+
+        public object ThreadedTask(object parameter)
+        {
+            int value = (int)parameter;
+
+            int output = rand.Next() * rand.Next() * value;
+
+            return output;
+        }
+
+        public void PostFunction(object parameter)
+        {
+            Debug.Log("Running PostFunction; output of threadedTask is: " + parameter);
         }
     }
 }
