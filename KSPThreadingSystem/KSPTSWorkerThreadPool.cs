@@ -13,6 +13,12 @@ namespace KSPThreadingSystem
         private Queue<Action> _tasks = new Queue<Action>();
         private readonly object locker = new object();
 
+        internal bool busy
+        {
+            get { return busy; }
+            private set { busy = value; }
+        }
+
         internal KSPTSWorkerThreadPool() : this(Environment.ProcessorCount) { }
 
         internal KSPTSWorkerThreadPool(int numThreads)
@@ -41,7 +47,11 @@ namespace KSPThreadingSystem
                 lock (locker)
                 {
                     while (_tasks.Count == 0)
+                    {
+                        busy = false;
                         Monitor.Wait(locker);
+                    }
+                    busy = true;
                     currentTask = _tasks.Dequeue();
                 }
 

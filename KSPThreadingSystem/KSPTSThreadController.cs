@@ -17,6 +17,10 @@ namespace KSPThreadingSystem
         private GameObject endOfFrameManagerGO = null;
         private KSPTSEndOfFrameManager endOfFrameManager = null;
 
+        private KSPTSWorkerThreadPool _updateThreadPool;
+
+        internal KSPTSRegisteredActions registeredActions = new KSPTSRegisteredActions();
+
         internal KSPTSThreadController()
         {
             Debug.Log("KSPTSThreadController Created");
@@ -31,17 +35,23 @@ namespace KSPThreadingSystem
             GameEvents.onVesselGoOnRails.Add(ResetEndOfFrameManager);
             GameEvents.onVesselWasModified.Add(ResetEndOfFrameManager);
             GameEvents.onEditorShipModified.Add(ResetEndOfFrameManager);
-            Debug.Log("KSPTSThreadController initializing worker thread array: " + Environment.ProcessorCount + " threads allotted");
+
+            _updateThreadPool = new KSPTSWorkerThreadPool((int)(Environment.ProcessorCount * 0.5));
         }
 
         void Update()
         {
             CheckIfEOFManagerNeedsReseting();
+
+            List<Action> tmpActionList = registeredActions.inLoop_Update_Actions;
+
+            for (int i = 0; i < tmpActionList.Count; i++)
+                _updateThreadPool.EnqueueNewTask(tmpActionList[i]);
         }
 
         internal void EndUpdate()
         {
-
+            while (_updateThreadPool.busy) ;    //Wait for threadpool to finish
         }
 
         //This will trigger a reset if the Scene changes or if the number of GOs change.
@@ -95,5 +105,27 @@ namespace KSPThreadingSystem
         }
 
         #endregion
+
+        internal class KSPTSRegisteredActions
+        {
+            internal KSPTSRegisteredActions()
+            {
+                inLoop_Update_Actions = new List<Action>();
+                inLoop_LateUpdate_Actions = new List<Action>();
+                inLoop_FixedUpdate_Actions = new List<Action>();
+
+                acrossLoop_Update_Actions = new List<Action>();
+                acrossLoop_LateUpdate_Actions = new List<Action>();
+                acrossLoop_FixedUpdate_Actions = new List<Action>();
+            }
+
+            internal List<Action> inLoop_Update_Actions;
+            internal List<Action> inLoop_LateUpdate_Actions;
+            internal List<Action> inLoop_FixedUpdate_Actions;
+
+            internal List<Action> acrossLoop_Update_Actions;
+            internal List<Action> acrossLoop_LateUpdate_Actions;
+            internal List<Action> acrossLoop_FixedUpdate_Actions;
+        }
     }
 }
