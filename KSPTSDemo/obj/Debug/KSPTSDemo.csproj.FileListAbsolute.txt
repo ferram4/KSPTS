@@ -1,9 +1,0 @@
-C:\Users\ferram4\KSPTS\KSPTSDemo\bin\Debug\KSPTSDemo.dll
-C:\Users\ferram4\KSPTS\KSPTSDemo\bin\Debug\KSPTSDemo.pdb
-C:\Users\ferram4\KSPTS\KSPTSDemo\bin\Debug\Assembly-CSharp.dll
-C:\Users\ferram4\KSPTS\KSPTSDemo\bin\Debug\KSPThreadingSystem.dll
-C:\Users\ferram4\KSPTS\KSPTSDemo\bin\Debug\UnityEngine.dll
-C:\Users\ferram4\KSPTS\KSPTSDemo\bin\Debug\KSPThreadingSystem.pdb
-C:\Users\ferram4\KSPTS\KSPTSDemo\obj\Debug\KSPTSDemo.csprojResolveAssemblyReference.cache
-C:\Users\ferram4\KSPTS\KSPTSDemo\obj\Debug\KSPTSDemo.dll
-C:\Users\ferram4\KSPTS\KSPTSDemo\obj\Debug\KSPTSDemo.pdb

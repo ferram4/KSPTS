@@ -2,3 +2,8 @@
 /KSPThreadingSystem/bin/Release/*
 /KSPThreadingSystem/obj/Debug/*
 /KSPThreadingSystem/obj/Release/*
+
+/KSPTSDemo/bin/Debug/*
+/KSPTSDemo/bin/Release/*
+/KSPTSDemo/obj/Debug/*
+/KSPTSDemo/obj/Release/*
