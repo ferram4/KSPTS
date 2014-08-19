@@ -5,6 +5,8 @@ VisualStudioVersion = 12.0.21005.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KSPThreadingSystem", "KSPThreadingSystem\KSPThreadingSystem.csproj", "{ACB22F23-E40A-4089-9C39-6B7C4B4C786B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KSPTSDemo", "KSPTSDemo\KSPTSDemo.csproj", "{3DACF936-E560-4CA4-A4D0-8A4F7596BEAB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{ACB22F23-E40A-4089-9C39-6B7C4B4C786B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ACB22F23-E40A-4089-9C39-6B7C4B4C786B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{ACB22F23-E40A-4089-9C39-6B7C4B4C786B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3DACF936-E560-4CA4-A4D0-8A4F7596BEAB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3DACF936-E560-4CA4-A4D0-8A4F7596BEAB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3DACF936-E560-4CA4-A4D0-8A4F7596BEAB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3DACF936-E560-4CA4-A4D0-8A4F7596BEAB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
