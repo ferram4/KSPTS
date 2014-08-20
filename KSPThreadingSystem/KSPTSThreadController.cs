@@ -16,19 +16,26 @@ namespace KSPThreadingSystem
         internal static KSPTSThreadController instance = null;
         internal static bool instanceExists = false;
 
-        private GameScenes lastScene = GameScenes.LOADING;
-        private int lastGOCount = 0;
-        private int frameCount = 0;
+        GameScenes lastScene = GameScenes.LOADING;
+        int lastGOCount = 0;
+        int frameCount = 0;
 
-        private GameObject endOfFrameManagerGO = null;
-        private KSPTSEndOfFrameManager endOfFrameManager = null;
+        GameObject endOfFrameManagerGO = null;
+        KSPTSEndOfFrameManager endOfFrameManager = null;
 
-        private KSPTSWorkerThreadPool _updateThreadPool;
+        KSPTSWorkerThreadPool _threadPool;
 
-        private Queue<KSPTSParametrizedPostFunction> _updatePostFunctions;
-        private int _updateNumPostFuncsRemaining = 0;
+        Dictionary<KSPTSThreadingGroup, Queue<KSPTSParametrizedPostFunction>> _postFunctions = new Dictionary<KSPTSThreadingGroup, Queue<KSPTSParametrizedPostFunction>>();
+        Dictionary<KSPTSThreadingGroup, int> _postFunctionsRemaining = new Dictionary<KSPTSThreadingGroup, int>();
+        /*private int _updateNumPostFuncsRemaining = 0;
+        private int _lateUpdateNumPostFuncsRemaining = 0;
+        private int _fixedUpdateNumPostFuncsRemaining = 0;
+        private int _acrossUpdateNumPostFuncsRemaining = 0;
+        private int _acrossLateUpdateNumPostFuncsRemaining = 0;
+        private int _acrossFixedUpdateNumPostFuncsRemaining = 0;*/
 
-        private readonly object locker = new object();
+        
+        readonly object locker = new object();
 
         internal KSPTSRegisteredTasks registeredTasks = new KSPTSRegisteredTasks();
 
@@ -47,8 +54,16 @@ namespace KSPThreadingSystem
             GameEvents.onVesselWasModified.Add(ResetEndOfFrameManager);
             GameEvents.onEditorShipModified.Add(ResetEndOfFrameManager);
 
-            _updateThreadPool = new KSPTSWorkerThreadPool((Environment.ProcessorCount));
-            _updatePostFunctions = new Queue<KSPTSParametrizedPostFunction>();
+            _threadPool = new KSPTSWorkerThreadPool((Environment.ProcessorCount));
+
+            //There has to be a cleaner way of doing this
+            _postFunctions.Add(KSPTSThreadingGroup.IN_LOOP_UPDATE, new Queue<KSPTSParametrizedPostFunction>());
+            _postFunctions.Add(KSPTSThreadingGroup.IN_LOOP_LATE_UPDATE, new Queue<KSPTSParametrizedPostFunction>());
+            _postFunctions.Add(KSPTSThreadingGroup.IN_LOOP_FIXED_UPDATE, new Queue<KSPTSParametrizedPostFunction>());
+            _postFunctions.Add(KSPTSThreadingGroup.ACROSS_LOOP_UPDATE, new Queue<KSPTSParametrizedPostFunction>());
+            _postFunctions.Add(KSPTSThreadingGroup.ACROSS_LOOP_LATE_UPDATE, new Queue<KSPTSParametrizedPostFunction>());
+            _postFunctions.Add(KSPTSThreadingGroup.ACROSS_LOOP_FIXED_UPDATE, new Queue<KSPTSParametrizedPostFunction>());
+
         }
 
         void Update()
@@ -57,8 +72,6 @@ namespace KSPThreadingSystem
 
             List<KSPTSTaskGroup> tmpTaskGroupList = registeredTasks.inLoop_Update_Actions;
 
-            //Debug.Log("Test Timing, KSPTSThreadController");
-
             for (int i = 0; i < tmpTaskGroupList.Count; i++)
             {
                 KSPTSTaskGroup tmpTaskGroup = tmpTaskGroupList[i];
@@ -66,58 +79,53 @@ namespace KSPThreadingSystem
                 if (tmpTaskGroup.preFunction != null)
                     tmpObject = tmpTaskGroup.preFunction();
 
-                _updateThreadPool.EnqueueNewTask(tmpTaskGroup.threadedTask, tmpObject, tmpTaskGroup.postFunction, KSPTSThreadingGroups.IN_LOOP_UPDATE);
+                _threadPool.EnqueueNewTask(tmpTaskGroup.threadedTask, tmpObject, tmpTaskGroup.postFunction, KSPTSThreadingGroup.IN_LOOP_UPDATE);
             }
-            _updateNumPostFuncsRemaining = tmpTaskGroupList.Count;
+            _postFunctionsRemaining[KSPTSThreadingGroup.IN_LOOP_UPDATE] = tmpTaskGroupList.Count;
         }
 
         internal void EndUpdate()
         {
-            _updateThreadPool.SetUrgent(KSPTSThreadingGroups.IN_LOOP_UPDATE);
+            WaitForTheadingGroupToFinish(KSPTSThreadingGroup.IN_LOOP_UPDATE);
+        }
 
-            while(_updatePostFunctions.Count > 0)
+        internal void EnqueuePostFunction(Action<object> postFunction, object parameter, KSPTSThreadingGroup group)
+        {
+            KSPTSParametrizedPostFunction tmpPostFunc = new KSPTSParametrizedPostFunction(postFunction, parameter);
+            Queue<KSPTSParametrizedPostFunction> tmpQueue = _postFunctions[group];
+
+            lock(locker)
+            {
+                tmpQueue.Enqueue(tmpPostFunc);
+                Monitor.Pulse(locker);
+            }
+        }
+
+        void WaitForTheadingGroupToFinish(KSPTSThreadingGroup group)
+        {
+            _threadPool.SetUrgent(group);
+
+            int numPostFuncsRemaining = _postFunctionsRemaining[group];
+            Queue<KSPTSParametrizedPostFunction> postFunctionQueue = _postFunctions[group];
+
+            while (numPostFuncsRemaining > 0)
             {
                 KSPTSParametrizedPostFunction tmp;
                 lock (locker)
                 {
-                    tmp = _updatePostFunctions.Dequeue();
-                    //Monitor.Pulse(locker);
-                }
-
-                //Debug.Log(_updateNumPostFuncsRemaining);
-
-                _updateNumPostFuncsRemaining--;
-                if (tmp.postFunction != null)
-                    tmp.postFunction(tmp.parameter);
-            }
-
-            while (_updateNumPostFuncsRemaining > 0)
-            {
-                //Debug.Log(_updateNumPostFuncsRemaining);
-                lock (locker)
-                {
-                    while (_updatePostFunctions.Count == 0)
+                    while (postFunctionQueue.Count == 0)
                         Monitor.Wait(locker);
 
-                    KSPTSParametrizedPostFunction tmp;
-                    tmp = _updatePostFunctions.Dequeue();
-
-                    _updateNumPostFuncsRemaining--;
-                    if (tmp.postFunction != null)
-                        tmp.postFunction(tmp.parameter);
+                    tmp = postFunctionQueue.Dequeue();
                 }
+                numPostFuncsRemaining--;
+                if (tmp.postFunction != null)
+                    tmp.postFunction(tmp.parameter);
+
             }
         }
 
-        internal void EnqueuePostFunction(Action<object> postFunction, object parameter)
-        {
-            KSPTSParametrizedPostFunction tmpPostFunc = new KSPTSParametrizedPostFunction(postFunction, parameter);
-            lock(locker)
-            {
-                _updatePostFunctions.Enqueue(tmpPostFunc);
-                Monitor.Pulse(locker);
-            }
-        }
+        #region EOFManagerResets
 
         //This will trigger a reset if the Scene changes or if the number of GOs change.
         void CheckIfEOFManagerNeedsResetting()
@@ -142,10 +150,7 @@ namespace KSPThreadingSystem
             frameCount++;
         }
 
-        #region EOFManagerResets
-
         //These are used to destroy and recreate the EOFManager that handles threads that must end in the same frame they started in
-
         void ResetEndOfFrameManager(ShipConstruct v)
         {
             ResetEndOfFrameManager();

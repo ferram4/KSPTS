@@ -24,9 +24,9 @@ namespace KSPThreadingSystem
                 (_threads[i] = new Thread(DoTasks)).Start();
         }
 
-        internal void EnqueueNewTask(Func<object, object> newTask, object newParameter, Action<object> newPostFunction, KSPTSThreadingGroups group)
+        internal void EnqueueNewTask(Func<object, object> newTask, object newParameter, Action<object> newPostFunction, KSPTSThreadingGroup group)
         {
-            KSPTSParametrizedTask _paraAction = new KSPTSParametrizedTask(newTask, newParameter, newPostFunction);
+            KSPTSParametrizedTask _paraAction = new KSPTSParametrizedTask(newTask, newParameter, newPostFunction, group);
             lock(locker)
             {
                 _tasks.Enqueue(_paraAction, group);
@@ -34,7 +34,7 @@ namespace KSPThreadingSystem
             }
         }
 
-        internal void SetUrgent(KSPTSThreadingGroups urgentGroup)
+        internal void SetUrgent(KSPTSThreadingGroup urgentGroup)
         {
             lock (locker)
             {
@@ -58,13 +58,13 @@ namespace KSPThreadingSystem
 
                 if (currentTask.action == null)
                 {
-                    KSPTSThreadController.instance.EnqueuePostFunction(null, null);
+                    KSPTSThreadController.instance.EnqueuePostFunction(null, null, currentTask.threadingGroup);
                     continue;
                 }
 
                 object postFuncParam = currentTask.action(currentTask.parameter);
 
-                KSPTSThreadController.instance.EnqueuePostFunction(currentTask.postFunction, postFuncParam);
+                KSPTSThreadController.instance.EnqueuePostFunction(currentTask.postFunction, postFuncParam, currentTask.threadingGroup);
             }
         }
     }

@@ -56,19 +56,21 @@ namespace KSPThreadingSystem
         internal Func<object, object> action;
         internal object parameter;
         internal Action<object> postFunction;
+        internal KSPTSThreadingGroup threadingGroup;
 
-        internal KSPTSParametrizedTask(Func<object, object> func, object parameter, Action<object> postFunction)
+        internal KSPTSParametrizedTask(Func<object, object> func, object parameter, Action<object> postFunction, KSPTSThreadingGroup threadingGroup)
         {
             this.action = func;
             this.parameter = parameter;
             this.postFunction = postFunction;
+            this.threadingGroup = threadingGroup;
         }
     }
 
     /// <summary>
     /// Enum used to specify threading groups and priority; arranged from highest priority to lowest
     /// </summary>
-    public enum KSPTSThreadingGroups
+    public enum KSPTSThreadingGroup
     {
         IN_LOOP_UPDATE,
         IN_LOOP_LATE_UPDATE,

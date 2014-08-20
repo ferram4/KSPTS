@@ -18,7 +18,7 @@ namespace KSPThreadingSystem
         /// </summary>
         /// <param name="threadingGroup">Determines which loop to synchronize with and when</param>
         /// <param name="threadedTask">Task that takes an object as a parameter and returns an object</param>
-        public static void RegisterNewThreadTask(KSPTSThreadingGroups threadingGroup, Func<object, object> threadedTask)
+        public static void RegisterNewThreadTask(KSPTSThreadingGroup threadingGroup, Func<object, object> threadedTask)
         {
             RegisterNewThreadTask(threadingGroup, null, threadedTask, null);
         }
@@ -29,7 +29,7 @@ namespace KSPThreadingSystem
         /// <param name="threadingGroup">Determines which loop to synchronize with and when</param>
         /// <param name="preFunction">Method that returns an object passed to the threadedTask as a parameter; run in the main Unity thread before threadedTask is started</param>
         /// <param name="threadedTask">Task that takes an object as a parameter and returns an object</param>
-        public static void RegisterNewThreadTask(KSPTSThreadingGroups threadingGroup, Func<object> preFunction, Func<object, object> threadedTask)
+        public static void RegisterNewThreadTask(KSPTSThreadingGroup threadingGroup, Func<object> preFunction, Func<object, object> threadedTask)
         {
             RegisterNewThreadTask(threadingGroup, preFunction, threadedTask, null);
         }
@@ -40,7 +40,7 @@ namespace KSPThreadingSystem
         /// <param name="threadingGroup">Determines which loop to synchronize with and when</param>
         /// <param name="threadedTask">Task that takes an object as a parameter and returns an object</param>
         /// <param name="postFunction">Void Method that takes an object as a parameter and is run in the main Unity thread after threadedTask completes</param>
-        public static void RegisterNewThreadTask(KSPTSThreadingGroups threadingGroup, Func<object, object> threadedTask, Action<object> postFunction)
+        public static void RegisterNewThreadTask(KSPTSThreadingGroup threadingGroup, Func<object, object> threadedTask, Action<object> postFunction)
         {
             RegisterNewThreadTask(threadingGroup, null, threadedTask, postFunction);
         }
@@ -52,7 +52,7 @@ namespace KSPThreadingSystem
         /// <param name="preFunction">Method that returns an object passed to the threadedTask as a parameter; run in the main Unity thread before threadedTask is started</param>
         /// <param name="threadedTask">Task that takes an object as a parameter and returns an object</param>
         /// <param name="postFunction">Void Method that takes an object as a parameter and is run in the main Unity thread after threadedTask completes</param>
-        public static void RegisterNewThreadTask(KSPTSThreadingGroups threadingGroup, Func<object> preFunction, Func<object, object> threadedTask, Action<object> postFunction)
+        public static void RegisterNewThreadTask(KSPTSThreadingGroup threadingGroup, Func<object> preFunction, Func<object, object> threadedTask, Action<object> postFunction)
         {
             KSPTSTaskGroup newTaskGroup = new KSPTSTaskGroup(preFunction, threadedTask, postFunction);
             RegisterNewThreadTask(threadingGroup, newTaskGroup);
@@ -63,33 +63,33 @@ namespace KSPThreadingSystem
         /// </summary>
         /// <param name="threadingGroup">Determines which loop to synchronize with and when</param>
         /// <param name="newTaskGroup">Class holding all pre-function, threadedTask, and post-function data</param>
-        internal static void RegisterNewThreadTask(KSPTSThreadingGroups threadingGroup, KSPTSTaskGroup newTaskGroup)
+        internal static void RegisterNewThreadTask(KSPTSThreadingGroup threadingGroup, KSPTSTaskGroup newTaskGroup)
         {
             KSPTSRegisteredTasks registeredTasks = KSPTSThreadController.instance.registeredTasks;
 
             switch (threadingGroup)
             {
-                case KSPTSThreadingGroups.IN_LOOP_UPDATE:
+                case KSPTSThreadingGroup.IN_LOOP_UPDATE:
                 registeredTasks.inLoop_Update_Actions.Add(newTaskGroup);
                 return;
 
-                case KSPTSThreadingGroups.IN_LOOP_LATE_UPDATE:
+                case KSPTSThreadingGroup.IN_LOOP_LATE_UPDATE:
                 registeredTasks.inLoop_LateUpdate_Actions.Add(newTaskGroup);
                 return;
 
-                case KSPTSThreadingGroups.IN_LOOP_FIXED_UPDATE:
+                case KSPTSThreadingGroup.IN_LOOP_FIXED_UPDATE:
                 registeredTasks.inLoop_FixedUpdate_Actions.Add(newTaskGroup);
                 return;
 
-                case KSPTSThreadingGroups.ACROSS_LOOP_UPDATE:
+                case KSPTSThreadingGroup.ACROSS_LOOP_UPDATE:
                 registeredTasks.acrossLoop_Update_Actions.Add(newTaskGroup);
                 return;
 
-                case KSPTSThreadingGroups.ACROSS_LOOP_LATE_UPDATE:
+                case KSPTSThreadingGroup.ACROSS_LOOP_LATE_UPDATE:
                 registeredTasks.acrossLoop_LateUpdate_Actions.Add(newTaskGroup);
                 return;
 
-                case KSPTSThreadingGroups.ACROSS_LOOP_FIXED_UPDATE:
+                case KSPTSThreadingGroup.ACROSS_LOOP_FIXED_UPDATE:
                 registeredTasks.acrossLoop_FixedUpdate_Actions.Add(newTaskGroup);
                 return;
 
@@ -107,28 +107,28 @@ namespace KSPThreadingSystem
         /// <param name="threadingGroup">Determines which loop to synchronize with and when</param>
         /// <param name="threadedTask">Task that takes an object as a parameter and returns an object</param>
         /// <returns>Success?</returns>
-        public static bool TryUnregisterThreadTask(KSPTSThreadingGroups threadingGroup, Func<object, object> threadedTask)
+        public static bool TryUnregisterThreadTask(KSPTSThreadingGroup threadingGroup, Func<object, object> threadedTask)
         {
             KSPTSRegisteredTasks registeredTasks = KSPTSThreadController.instance.registeredTasks;
 
             switch (threadingGroup)
             {
-                case KSPTSThreadingGroups.IN_LOOP_UPDATE:
+                case KSPTSThreadingGroup.IN_LOOP_UPDATE:
                     return TryRemoveThreadedTask(registeredTasks.inLoop_Update_Actions, threadedTask);
 
-                case KSPTSThreadingGroups.IN_LOOP_LATE_UPDATE:
+                case KSPTSThreadingGroup.IN_LOOP_LATE_UPDATE:
                     return TryRemoveThreadedTask(registeredTasks.inLoop_LateUpdate_Actions, threadedTask);
 
-                case KSPTSThreadingGroups.IN_LOOP_FIXED_UPDATE:
+                case KSPTSThreadingGroup.IN_LOOP_FIXED_UPDATE:
                     return TryRemoveThreadedTask(registeredTasks.inLoop_FixedUpdate_Actions, threadedTask);
 
-                case KSPTSThreadingGroups.ACROSS_LOOP_UPDATE:
+                case KSPTSThreadingGroup.ACROSS_LOOP_UPDATE:
                     return TryRemoveThreadedTask(registeredTasks.acrossLoop_Update_Actions, threadedTask);
 
-                case KSPTSThreadingGroups.ACROSS_LOOP_LATE_UPDATE:
+                case KSPTSThreadingGroup.ACROSS_LOOP_LATE_UPDATE:
                     return TryRemoveThreadedTask(registeredTasks.acrossLoop_LateUpdate_Actions, threadedTask);
 
-                case KSPTSThreadingGroups.ACROSS_LOOP_FIXED_UPDATE:
+                case KSPTSThreadingGroup.ACROSS_LOOP_FIXED_UPDATE:
                     return TryRemoveThreadedTask(registeredTasks.acrossLoop_FixedUpdate_Actions, threadedTask);
 
                 default:
