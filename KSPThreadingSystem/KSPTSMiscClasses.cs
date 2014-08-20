@@ -61,7 +61,7 @@ namespace KSPThreadingSystem
     }
 
     /// <summary>
-    /// Enum used to specify threading groups and priority; arranged from highest priority to lowest
+    /// Enum used to specify threading groups
     /// </summary>
     public enum KSPTSThreadingGroup
     {
