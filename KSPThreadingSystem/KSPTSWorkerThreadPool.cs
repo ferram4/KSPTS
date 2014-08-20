@@ -14,8 +14,6 @@ namespace KSPThreadingSystem
         private KSPTSPrioritizedQueue _tasks = new KSPTSPrioritizedQueue();
         private readonly object locker = new object();
 
-        private bool busy;
-
         internal KSPTSWorkerThreadPool() : this(Environment.ProcessorCount) { }
 
         internal KSPTSWorkerThreadPool(int numThreads)
@@ -44,16 +42,6 @@ namespace KSPThreadingSystem
             }
         }
 
-        internal bool IsBusy()
-        {
-            bool value = false;
-            lock (locker)
-            {
-                value = busy;
-            }
-            return value;
-        }
-
         private void DoTasks()
         {
             while(true)
@@ -62,16 +50,17 @@ namespace KSPThreadingSystem
 
                 lock (locker)
                 {
-                    busy = false;
                     while (!_tasks.hasTasks)
                         Monitor.Wait(locker);
 
                     currentTask = _tasks.Dequeue();
-                    busy = true;
                 }
 
                 if (currentTask.action == null)
+                {
+                    KSPTSThreadController.instance.EnqueuePostFunction(null, null);
                     continue;
+                }
 
                 object postFuncParam = currentTask.action(currentTask.parameter);
 

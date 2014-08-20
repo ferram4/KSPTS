@@ -18,7 +18,9 @@ namespace KSPThreadingSystem
         private KSPTSEndOfFrameManager endOfFrameManager = null;
 
         private KSPTSWorkerThreadPool _updateThreadPool;
+
         private Queue<KSPTSParametrizedPostFunction> _updatePostFunctions;
+        private int _updateNumPostFuncsRemaining = 0;
 
         private readonly object locker = new object();
 
@@ -49,52 +51,55 @@ namespace KSPThreadingSystem
 
             List<KSPTSTaskGroup> tmpTaskGroupList = registeredTasks.inLoop_Update_Actions;
 
+            Debug.Log("Test Timing, KSPTSThreadController");
+
             for (int i = 0; i < tmpTaskGroupList.Count; i++)
             {
                 KSPTSTaskGroup tmpTaskGroup = tmpTaskGroupList[i];
                 object tmpObject = null;
                 if (tmpTaskGroup.preFunction != null)
-                {
                     tmpObject = tmpTaskGroup.preFunction();
-                    Debug.Log(i);
-                }
 
                 _updateThreadPool.EnqueueNewTask(tmpTaskGroup.threadedTask, tmpObject, tmpTaskGroup.postFunction, KSPTSThreadingGroups.IN_LOOP_UPDATE);
             }
+            _updateNumPostFuncsRemaining = tmpTaskGroupList.Count;
         }
 
         internal void EndUpdate()
         {
             //_updateThreadPool.SetUrgent(KSPTSThreadingGroups.IN_LOOP_UPDATE);
 
-            while(_updatePostFunctions.Count > 0)
+            /*while(_updatePostFunctions.Count > 0)
             {
                 KSPTSParametrizedPostFunction tmp;
                 lock (locker)
                 {
                     tmp = _updatePostFunctions.Dequeue();
-                    Monitor.Pulse(locker);
+                    //Monitor.Pulse(locker);
                 }
 
+                Debug.Log(_updateNumPostFuncsRemaining);
+
+                _updateNumPostFuncsRemaining--;
                 if (tmp.postFunction != null)
                     tmp.postFunction(tmp.parameter);
-            }
+            }*/
 
-            while (_updateThreadPool.IsBusy())
+            while (_updateNumPostFuncsRemaining > 0)
             {
-                while (_updatePostFunctions.Count > 0)
+                Debug.Log(_updateNumPostFuncsRemaining);
+                lock (locker)
                 {
-                    KSPTSParametrizedPostFunction tmp;
-                    lock (locker)
-                    {
-                        tmp = _updatePostFunctions.Dequeue();
-                        Monitor.Pulse(locker);
-                    }
+                    while (_updatePostFunctions.Count == 0)
+                        Monitor.Wait(locker);
 
+                    KSPTSParametrizedPostFunction tmp;
+                    tmp = _updatePostFunctions.Dequeue();
+
+                    _updateNumPostFuncsRemaining--;
                     if (tmp.postFunction != null)
                         tmp.postFunction(tmp.parameter);
                 }
-                //Thread.Sleep(0);
             }
         }
 

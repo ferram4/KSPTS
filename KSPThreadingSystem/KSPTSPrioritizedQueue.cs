@@ -44,56 +44,53 @@ namespace KSPThreadingSystem
             {
                 tmpQueue = taskQueues[urgentQueue];
                 if (tmpQueue.Count > 0)
-                    returnVal = Dequeue();
+                    return tmpQueue.Dequeue();
                 else
                     urgent = false;
+            }
 
+            tmpQueue = taskQueues[KSPTSThreadingGroups.IN_LOOP_FIXED_UPDATE];
+            if (tmpQueue.Count > 0)
+            {
+                returnVal = tmpQueue.Dequeue();
                 return returnVal;
             }
-            else
+
+            tmpQueue = taskQueues[KSPTSThreadingGroups.ACROSS_LOOP_FIXED_UPDATE];
+            if (tmpQueue.Count > 0)
             {
-                tmpQueue = taskQueues[KSPTSThreadingGroups.IN_LOOP_FIXED_UPDATE];
-                if (tmpQueue.Count > 0)
-                {
-                    returnVal = tmpQueue.Dequeue();
-                    return returnVal;
-                }
-
-                tmpQueue = taskQueues[KSPTSThreadingGroups.ACROSS_LOOP_FIXED_UPDATE];
-                if (tmpQueue.Count > 0)
-                {
-                    returnVal = tmpQueue.Dequeue();
-                    return returnVal;
-                }
-
-                tmpQueue = taskQueues[KSPTSThreadingGroups.IN_LOOP_UPDATE];
-                if (tmpQueue.Count > 0)
-                {
-                    returnVal = tmpQueue.Dequeue();
-                    return returnVal;
-                }
-
-                tmpQueue = taskQueues[KSPTSThreadingGroups.IN_LOOP_LATE_UPDATE];
-                if (tmpQueue.Count > 0)
-                {
-                    returnVal = tmpQueue.Dequeue();
-                    return returnVal;
-                }
-
-                tmpQueue = taskQueues[KSPTSThreadingGroups.ACROSS_LOOP_UPDATE];
-                if (tmpQueue.Count > 0)
-                {
-                    returnVal = tmpQueue.Dequeue();
-                    return returnVal;
-                }
-
-                tmpQueue = taskQueues[KSPTSThreadingGroups.ACROSS_LOOP_LATE_UPDATE];
-                if (tmpQueue.Count > 0)
-                {
-                    returnVal = tmpQueue.Dequeue();
-                    return returnVal;
-                }
+                returnVal = tmpQueue.Dequeue();
+                return returnVal;
             }
+
+            tmpQueue = taskQueues[KSPTSThreadingGroups.IN_LOOP_UPDATE];
+            if (tmpQueue.Count > 0)
+            {
+                returnVal = tmpQueue.Dequeue();
+                return returnVal;
+            }
+
+            tmpQueue = taskQueues[KSPTSThreadingGroups.IN_LOOP_LATE_UPDATE];
+            if (tmpQueue.Count > 0)
+            {
+                returnVal = tmpQueue.Dequeue();
+                return returnVal;
+            }
+
+            tmpQueue = taskQueues[KSPTSThreadingGroups.ACROSS_LOOP_UPDATE];
+            if (tmpQueue.Count > 0)
+            {
+                returnVal = tmpQueue.Dequeue();
+                return returnVal;
+            }
+
+            tmpQueue = taskQueues[KSPTSThreadingGroups.ACROSS_LOOP_LATE_UPDATE];
+            if (tmpQueue.Count > 0)
+            {
+                returnVal = tmpQueue.Dequeue();
+                return returnVal;
+            }
+            
             hasTasks = false;
 
             return null;

@@ -34,12 +34,12 @@ namespace KSPTSDemo
     public class KSPTSDemoObject
     {
         int val;
-        System.Random rand;
+        //System.Random rand;
 
         public KSPTSDemoObject(int val)
         {
             this.val = val;
-            rand = new System.Random(val * System.DateTime.Now.Millisecond);
+            //rand = new System.Random(val * System.DateTime.Now.Millisecond);
 
             KSPTSAPI.RegisterNewThreadTask(KSPTSThreadingGroups.IN_LOOP_UPDATE, PreFunction, ThreadedTask, PostFunction);
         }
@@ -54,7 +54,7 @@ namespace KSPTSDemo
         {
             int value = (int)parameter;
 
-            int output = rand.Next() * rand.Next() * value;
+            int output = 25 * value;
 
             return output;
         }

@@ -7,3 +7,5 @@
 /KSPTSDemo/bin/Release/*
 /KSPTSDemo/obj/Debug/*
 /KSPTSDemo/obj/Release/*
+
+*.dll
