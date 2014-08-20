@@ -50,7 +50,7 @@ namespace KSPThreadingSystem
 
                 lock (locker)
                 {
-                    while (!_tasks.hasTasks)
+                    while (!_tasks.hasTasks())
                         Monitor.Wait(locker);
 
                     currentTask = _tasks.Dequeue();

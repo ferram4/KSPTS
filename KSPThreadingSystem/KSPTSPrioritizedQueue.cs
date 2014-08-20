@@ -11,8 +11,6 @@ namespace KSPThreadingSystem
         private KSPTSThreadingGroups urgentQueue;
         private bool urgent = false;
 
-        internal bool hasTasks = false;
-
         internal KSPTSPrioritizedQueue()
         {
             //There has to be a cleaner way of doing this
@@ -33,7 +31,16 @@ namespace KSPThreadingSystem
         internal void Enqueue(KSPTSParametrizedTask newTask, KSPTSThreadingGroups group)
         {
             taskQueues[group].Enqueue(newTask);
-            hasTasks = true;
+        }
+
+        internal bool hasTasks()
+        {
+            return (taskQueues[KSPTSThreadingGroups.IN_LOOP_FIXED_UPDATE].Count > 0 ||
+                taskQueues[KSPTSThreadingGroups.ACROSS_LOOP_FIXED_UPDATE].Count > 0 ||
+                taskQueues[KSPTSThreadingGroups.IN_LOOP_UPDATE].Count > 0 ||
+                taskQueues[KSPTSThreadingGroups.IN_LOOP_LATE_UPDATE].Count > 0 ||
+                taskQueues[KSPTSThreadingGroups.ACROSS_LOOP_UPDATE].Count > 0 ||
+                taskQueues[KSPTSThreadingGroups.ACROSS_LOOP_LATE_UPDATE].Count > 0);
         }
 
         internal KSPTSParametrizedTask Dequeue()
@@ -91,8 +98,6 @@ namespace KSPThreadingSystem
                 return returnVal;
             }
             
-            hasTasks = false;
-
             return null;
         }
     }

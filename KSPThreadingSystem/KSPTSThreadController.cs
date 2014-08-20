@@ -51,7 +51,7 @@ namespace KSPThreadingSystem
 
             List<KSPTSTaskGroup> tmpTaskGroupList = registeredTasks.inLoop_Update_Actions;
 
-            Debug.Log("Test Timing, KSPTSThreadController");
+            //Debug.Log("Test Timing, KSPTSThreadController");
 
             for (int i = 0; i < tmpTaskGroupList.Count; i++)
             {
@@ -67,9 +67,9 @@ namespace KSPThreadingSystem
 
         internal void EndUpdate()
         {
-            //_updateThreadPool.SetUrgent(KSPTSThreadingGroups.IN_LOOP_UPDATE);
+            _updateThreadPool.SetUrgent(KSPTSThreadingGroups.IN_LOOP_UPDATE);
 
-            /*while(_updatePostFunctions.Count > 0)
+            while(_updatePostFunctions.Count > 0)
             {
                 KSPTSParametrizedPostFunction tmp;
                 lock (locker)
@@ -78,16 +78,16 @@ namespace KSPThreadingSystem
                     //Monitor.Pulse(locker);
                 }
 
-                Debug.Log(_updateNumPostFuncsRemaining);
+                //Debug.Log(_updateNumPostFuncsRemaining);
 
                 _updateNumPostFuncsRemaining--;
                 if (tmp.postFunction != null)
                     tmp.postFunction(tmp.parameter);
-            }*/
+            }
 
             while (_updateNumPostFuncsRemaining > 0)
             {
-                Debug.Log(_updateNumPostFuncsRemaining);
+                //Debug.Log(_updateNumPostFuncsRemaining);
                 lock (locker)
                 {
                     while (_updatePostFunctions.Count == 0)
