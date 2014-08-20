@@ -12,18 +12,25 @@ namespace KSPThreadingSystem
     /// </summary>
     internal class KSPTSEndOfFrameManager : MonoBehaviour
     {
-        //int creationId;
 
         internal KSPTSEndOfFrameManager()
         {
-            //creationId = DateTime.Now.GetHashCode();
             Debug.Log("KSPTSEndOfFrameManager has been created");
         }
 
         void Update()
         {
-            //Debug.Log("Test Timing, KSPTSEndOfFrameManager, " + creationId);
             KSPTSThreadController.instance.EndUpdate();
+        }
+
+        void LateUpdate()
+        {
+            KSPTSThreadController.instance.EndLateUpdate();
+        }
+
+        void FixedUpdate()
+        {
+            KSPTSThreadController.instance.EndFixedUpdate();
         }
     }
 }

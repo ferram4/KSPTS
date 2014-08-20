@@ -27,13 +27,6 @@ namespace KSPThreadingSystem
 
         Dictionary<KSPTSThreadingGroup, Queue<KSPTSParametrizedPostFunction>> _postFunctions = new Dictionary<KSPTSThreadingGroup, Queue<KSPTSParametrizedPostFunction>>();
         Dictionary<KSPTSThreadingGroup, int> _postFunctionsRemaining = new Dictionary<KSPTSThreadingGroup, int>();
-        /*private int _updateNumPostFuncsRemaining = 0;
-        private int _lateUpdateNumPostFuncsRemaining = 0;
-        private int _fixedUpdateNumPostFuncsRemaining = 0;
-        private int _acrossUpdateNumPostFuncsRemaining = 0;
-        private int _acrossLateUpdateNumPostFuncsRemaining = 0;
-        private int _acrossFixedUpdateNumPostFuncsRemaining = 0;*/
-
         
         readonly object locker = new object();
 
@@ -66,22 +59,12 @@ namespace KSPThreadingSystem
 
         }
 
+        #region Unity Functions
+
         void Update()
         {
             CheckIfEOFManagerNeedsResetting();
-
-            List<KSPTSTaskGroup> tmpTaskGroupList = registeredTasks.inLoop_Update_Actions;
-
-            for (int i = 0; i < tmpTaskGroupList.Count; i++)
-            {
-                KSPTSTaskGroup tmpTaskGroup = tmpTaskGroupList[i];
-                object tmpObject = null;
-                if (tmpTaskGroup.preFunction != null)
-                    tmpObject = tmpTaskGroup.preFunction();
-
-                _threadPool.EnqueueNewTask(tmpTaskGroup.threadedTask, tmpObject, tmpTaskGroup.postFunction, KSPTSThreadingGroup.IN_LOOP_UPDATE);
-            }
-            _postFunctionsRemaining[KSPTSThreadingGroup.IN_LOOP_UPDATE] = tmpTaskGroupList.Count;
+            QueueThreadingGroupTasks(KSPTSThreadingGroup.IN_LOOP_UPDATE);
         }
 
         internal void EndUpdate()
@@ -89,6 +72,35 @@ namespace KSPThreadingSystem
             WaitForTheadingGroupToFinish(KSPTSThreadingGroup.IN_LOOP_UPDATE);
         }
 
+        void LateUpdate()
+        {
+            CheckIfEOFManagerNeedsResetting();
+            QueueThreadingGroupTasks(KSPTSThreadingGroup.IN_LOOP_LATE_UPDATE);
+        }
+
+        internal void EndLateUpdate()
+        {
+            WaitForTheadingGroupToFinish(KSPTSThreadingGroup.IN_LOOP_LATE_UPDATE);
+        }
+
+        void FixedUpdate()
+        {
+            QueueThreadingGroupTasks(KSPTSThreadingGroup.IN_LOOP_FIXED_UPDATE);
+        }
+
+        internal void EndFixedUpdate()
+        {
+            WaitForTheadingGroupToFinish(KSPTSThreadingGroup.IN_LOOP_FIXED_UPDATE);
+        }
+
+        #endregion
+
+        /// <summary>
+        /// Queues up post-function with relevant data for execution in WaitForTheadingGroupToFinish()
+        /// </summary>
+        /// <param name="postFunction">function to be executed using data from completed threadedTask</param>
+        /// <param name="parameter">data from completed threadedTask</param>
+        /// <param name="group">this function's thread group</param>
         internal void EnqueuePostFunction(Action<object> postFunction, object parameter, KSPTSThreadingGroup group)
         {
             KSPTSParametrizedPostFunction tmpPostFunc = new KSPTSParametrizedPostFunction(postFunction, parameter);
@@ -101,6 +113,33 @@ namespace KSPThreadingSystem
             }
         }
 
+        #region Thread Tasking Functions
+
+        /// <summary>
+        /// Queues up all registered tasks and sends them to the thread pool to be processed
+        /// </summary>
+        /// <param name="group">Threading group to queue tasks for</param>
+        void QueueThreadingGroupTasks(KSPTSThreadingGroup group)
+        {
+            List<KSPTSTaskGroup> tmpTaskGroupList = registeredTasks._groupTasks[group];
+
+            for (int i = 0; i < tmpTaskGroupList.Count; i++)
+            {
+                KSPTSTaskGroup tmpTaskGroup = tmpTaskGroupList[i];
+                object tmpObject = null;
+                if (tmpTaskGroup.preFunction != null)
+                    tmpObject = tmpTaskGroup.preFunction();
+
+                _threadPool.EnqueueNewTask(tmpTaskGroup.threadedTask, tmpObject, tmpTaskGroup.postFunction, group);
+            }
+            _postFunctionsRemaining[group] = tmpTaskGroupList.Count;
+
+        }
+
+        /// <summary>
+        /// Waits for tasks to finish, executes post-functions and then returns control to Unity and the rest of KSP
+        /// </summary>
+        /// <param name="group">Threading group being waited on</param>
         void WaitForTheadingGroupToFinish(KSPTSThreadingGroup group)
         {
             _threadPool.SetUrgent(group);
@@ -124,6 +163,8 @@ namespace KSPThreadingSystem
 
             }
         }
+
+        #endregion
 
         #region EOFManagerResets
 

@@ -7,22 +7,15 @@ namespace KSPThreadingSystem
     {
         internal KSPTSRegisteredTasks()
         {
-            inLoop_Update_Actions = new List<KSPTSTaskGroup>();
-            inLoop_LateUpdate_Actions = new List<KSPTSTaskGroup>();
-            inLoop_FixedUpdate_Actions = new List<KSPTSTaskGroup>();
-
-            acrossLoop_Update_Actions = new List<KSPTSTaskGroup>();
-            acrossLoop_LateUpdate_Actions = new List<KSPTSTaskGroup>();
-            acrossLoop_FixedUpdate_Actions = new List<KSPTSTaskGroup>();
+            _groupTasks.Add(KSPTSThreadingGroup.IN_LOOP_UPDATE, new List<KSPTSTaskGroup>());
+            _groupTasks.Add(KSPTSThreadingGroup.IN_LOOP_LATE_UPDATE, new List<KSPTSTaskGroup>());
+            _groupTasks.Add(KSPTSThreadingGroup.IN_LOOP_FIXED_UPDATE, new List<KSPTSTaskGroup>());
+            _groupTasks.Add(KSPTSThreadingGroup.ACROSS_LOOP_UPDATE, new List<KSPTSTaskGroup>());
+            _groupTasks.Add(KSPTSThreadingGroup.ACROSS_LOOP_LATE_UPDATE, new List<KSPTSTaskGroup>());
+            _groupTasks.Add(KSPTSThreadingGroup.ACROSS_LOOP_FIXED_UPDATE, new List<KSPTSTaskGroup>());
         }
 
-        internal List<KSPTSTaskGroup> inLoop_Update_Actions;
-        internal List<KSPTSTaskGroup> inLoop_LateUpdate_Actions;
-        internal List<KSPTSTaskGroup> inLoop_FixedUpdate_Actions;
-
-        internal List<KSPTSTaskGroup> acrossLoop_Update_Actions;
-        internal List<KSPTSTaskGroup> acrossLoop_LateUpdate_Actions;
-        internal List<KSPTSTaskGroup> acrossLoop_FixedUpdate_Actions;
+        internal Dictionary<KSPTSThreadingGroup, List<KSPTSTaskGroup>> _groupTasks = new Dictionary<KSPTSThreadingGroup, List<KSPTSTaskGroup>>();
     }
 
     internal class KSPTSTaskGroup

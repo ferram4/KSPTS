@@ -41,7 +41,7 @@ namespace KSPTSDemo
             this.val = val;
             //rand = new System.Random(val * System.DateTime.Now.Millisecond);
 
-            KSPTSAPI.RegisterNewThreadTask(KSPTSThreadingGroups.IN_LOOP_UPDATE, PreFunction, ThreadedTask, PostFunction);
+            KSPTSAPI.RegisterNewThreadTask(KSPTSThreadingGroup.IN_LOOP_UPDATE, PreFunction, ThreadedTask, PostFunction);
         }
 
         public object PreFunction()

@@ -67,36 +67,7 @@ namespace KSPThreadingSystem
         {
             KSPTSRegisteredTasks registeredTasks = KSPTSThreadController.instance.registeredTasks;
 
-            switch (threadingGroup)
-            {
-                case KSPTSThreadingGroup.IN_LOOP_UPDATE:
-                registeredTasks.inLoop_Update_Actions.Add(newTaskGroup);
-                return;
-
-                case KSPTSThreadingGroup.IN_LOOP_LATE_UPDATE:
-                registeredTasks.inLoop_LateUpdate_Actions.Add(newTaskGroup);
-                return;
-
-                case KSPTSThreadingGroup.IN_LOOP_FIXED_UPDATE:
-                registeredTasks.inLoop_FixedUpdate_Actions.Add(newTaskGroup);
-                return;
-
-                case KSPTSThreadingGroup.ACROSS_LOOP_UPDATE:
-                registeredTasks.acrossLoop_Update_Actions.Add(newTaskGroup);
-                return;
-
-                case KSPTSThreadingGroup.ACROSS_LOOP_LATE_UPDATE:
-                registeredTasks.acrossLoop_LateUpdate_Actions.Add(newTaskGroup);
-                return;
-
-                case KSPTSThreadingGroup.ACROSS_LOOP_FIXED_UPDATE:
-                registeredTasks.acrossLoop_FixedUpdate_Actions.Add(newTaskGroup);
-                return;
-
-                default:
-                Debug.LogError("KSPTSThreadingGroup Enum Error");
-                return;
-            }
+            registeredTasks._groupTasks[threadingGroup].Add(newTaskGroup);
         }
 
         #endregion
@@ -111,30 +82,13 @@ namespace KSPThreadingSystem
         {
             KSPTSRegisteredTasks registeredTasks = KSPTSThreadController.instance.registeredTasks;
 
-            switch (threadingGroup)
-            {
-                case KSPTSThreadingGroup.IN_LOOP_UPDATE:
-                    return TryRemoveThreadedTask(registeredTasks.inLoop_Update_Actions, threadedTask);
+            List<KSPTSTaskGroup> taskGroupList = null;
 
-                case KSPTSThreadingGroup.IN_LOOP_LATE_UPDATE:
-                    return TryRemoveThreadedTask(registeredTasks.inLoop_LateUpdate_Actions, threadedTask);
+            if(registeredTasks._groupTasks.TryGetValue(threadingGroup, out taskGroupList))
+                return TryRemoveThreadedTask(taskGroupList, threadedTask);
 
-                case KSPTSThreadingGroup.IN_LOOP_FIXED_UPDATE:
-                    return TryRemoveThreadedTask(registeredTasks.inLoop_FixedUpdate_Actions, threadedTask);
-
-                case KSPTSThreadingGroup.ACROSS_LOOP_UPDATE:
-                    return TryRemoveThreadedTask(registeredTasks.acrossLoop_Update_Actions, threadedTask);
-
-                case KSPTSThreadingGroup.ACROSS_LOOP_LATE_UPDATE:
-                    return TryRemoveThreadedTask(registeredTasks.acrossLoop_LateUpdate_Actions, threadedTask);
-
-                case KSPTSThreadingGroup.ACROSS_LOOP_FIXED_UPDATE:
-                    return TryRemoveThreadedTask(registeredTasks.acrossLoop_FixedUpdate_Actions, threadedTask);
-
-                default:
-                    Debug.LogError("KSPTSThreadingGroup Enum Error");
-                    return false;
-            }
+            Debug.LogError("KSPTS Error: Could not find specified Threading Group Task List");
+            return false;
         }
 
         static bool TryRemoveThreadedTask(List<KSPTSTaskGroup> taskGroupList, Func<object, object> threadedTask)
