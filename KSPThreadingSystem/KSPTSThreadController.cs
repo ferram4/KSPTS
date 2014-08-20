@@ -5,6 +5,12 @@ using UnityEngine;
 
 namespace KSPThreadingSystem
 {
+    /// <summary>
+    /// Controller class for the entire KSPTS.  Attached to a GameObject that is set to 
+    /// persist throughout the lifetime of the game; this ensures that the 
+    /// ThreadController is one of the first classes to execute when its Unity event
+    /// functions (Update, FixedUpdate, LateUpdate) are called.
+    /// </summary>
     internal class KSPTSThreadController : MonoBehaviour
     {
         internal static KSPTSThreadController instance = null;
