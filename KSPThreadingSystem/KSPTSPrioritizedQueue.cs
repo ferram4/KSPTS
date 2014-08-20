@@ -28,46 +28,84 @@ namespace KSPThreadingSystem
 
         internal void SetUrgent(KSPTSThreadingGroups urgentGroup)
         {
-//            lock (locker)
-//            {
+            lock (locker)
+            {
                 urgentQueue = urgentGroup;
                 urgent = true;
-                //Monitor.Pulse(locker);
-//            }
+            }
         }
 
         internal void Enqueue(KSPTSParametrizedTask newTask, KSPTSThreadingGroups group)
         {
-//            lock (locker)
-//            {
+            lock (locker)
+            {
                 taskQueues[group].Enqueue(newTask);
                 hasTasks = true;
-//            }
+            }
         }
 
         internal KSPTSParametrizedTask Dequeue()
         {
             Queue<KSPTSParametrizedTask> tmpQueue = null;
-//            lock(locker)
-                if(urgent)  //The main unity thread is waiting on something, clear everything out
+            KSPTSParametrizedTask returnVal = null;
+            lock(locker)
+                if (urgent)  //The main unity thread is waiting on something, clear everything out
                 {
                     tmpQueue = taskQueues[urgentQueue];
                     if (tmpQueue.Count > 0)
-                        return Dequeue();
+                        returnVal = Dequeue();
                     else
                         urgent = false;
-                }
 
-//            lock (locker)
-//            {
-                for (int i = 0; i < 6; i++)
-                {
-                    tmpQueue = taskQueues[(KSPTSThreadingGroups)i];
-                    if (tmpQueue.Count > 0)
-                        return tmpQueue.Dequeue();
+                    return returnVal;
                 }
-                hasTasks = false;
-//            }
+                else
+                {
+                    //for (int i = 0; i < 6; i++)
+                    //{
+                    tmpQueue = taskQueues[KSPTSThreadingGroups.IN_LOOP_FIXED_UPDATE];
+                    if (tmpQueue.Count > 0)
+                    {
+                        returnVal = tmpQueue.Dequeue();
+                        return returnVal;
+                    }
+
+                    tmpQueue = taskQueues[KSPTSThreadingGroups.ACROSS_LOOP_FIXED_UPDATE];
+                    if (tmpQueue.Count > 0)
+                    {
+                        returnVal = tmpQueue.Dequeue();
+                        return returnVal;
+                    }
+
+                    tmpQueue = taskQueues[KSPTSThreadingGroups.IN_LOOP_UPDATE];
+                    if (tmpQueue.Count > 0)
+                    {
+                        returnVal = tmpQueue.Dequeue();
+                        return returnVal;
+                    }
+
+                    tmpQueue = taskQueues[KSPTSThreadingGroups.IN_LOOP_LATE_UPDATE];
+                    if (tmpQueue.Count > 0)
+                    {
+                        returnVal = tmpQueue.Dequeue();
+                        return returnVal;
+                    }
+
+                    tmpQueue = taskQueues[KSPTSThreadingGroups.ACROSS_LOOP_UPDATE];
+                    if (tmpQueue.Count > 0)
+                    {
+                        returnVal = tmpQueue.Dequeue();
+                        return returnVal;
+                    }
+
+                    tmpQueue = taskQueues[KSPTSThreadingGroups.ACROSS_LOOP_LATE_UPDATE];
+                    if (tmpQueue.Count > 0)
+                    {
+                        returnVal = tmpQueue.Dequeue();
+                        return returnVal;
+                    }
+                }
+            hasTasks = false;
 
             return null;
         }

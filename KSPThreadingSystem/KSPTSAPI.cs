@@ -63,7 +63,7 @@ namespace KSPThreadingSystem
         /// </summary>
         /// <param name="threadingGroup">Determines which loop to synchronize with and when</param>
         /// <param name="newTaskGroup">Class holding all pre-function, threadedTask, and post-function data</param>
-        static void RegisterNewThreadTask(KSPTSThreadingGroups threadingGroup, KSPTSTaskGroup newTaskGroup)
+        internal static void RegisterNewThreadTask(KSPTSThreadingGroups threadingGroup, KSPTSTaskGroup newTaskGroup)
         {
             KSPTSRegisteredTasks registeredTasks = KSPTSThreadController.instance.registeredTasks;
 

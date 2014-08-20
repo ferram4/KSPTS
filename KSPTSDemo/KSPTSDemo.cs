@@ -10,7 +10,7 @@ namespace KSPTSDemo
     {
         KSPTSDemoObject[] array;
 
-        const int c = 15;
+        const int c = 2;
         readonly object locker = new object();
 
         void Start()

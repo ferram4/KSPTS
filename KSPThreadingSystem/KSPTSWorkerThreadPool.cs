@@ -31,6 +31,7 @@ namespace KSPThreadingSystem
             lock(locker)
             {
                 _tasks.Enqueue(_paraAction, group);
+                busy = true;
                 Monitor.Pulse(locker);
             }
         }
@@ -40,16 +41,17 @@ namespace KSPThreadingSystem
             lock (locker)
             {
                 _tasks.SetUrgent(urgentGroup);
+                Monitor.Pulse(locker);
             }
         }
 
         internal bool IsBusy()
         {
             bool value = false;
-            lock(locker)
-            {
+//            lock(locker)
+//            {
                 value = busy;
-            }
+//            }
             return value;
         }
 
@@ -63,9 +65,8 @@ namespace KSPThreadingSystem
                 {
                     busy = false;
                     while (!_tasks.hasTasks)
-                    {
                         Monitor.Wait(locker);
-                    }
+
                     busy = true;
                     currentTask = _tasks.Dequeue();
                 }

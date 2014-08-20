@@ -70,11 +70,11 @@ namespace KSPThreadingSystem
     /// </summary>
     public enum KSPTSThreadingGroups
     {
-        IN_LOOP_FIXED_UPDATE = 0,
-        ACROSS_LOOP_FIXED_UPDATE = 1,
-        IN_LOOP_UPDATE = 2,
-        IN_LOOP_LATE_UPDATE = 3,
-        ACROSS_LOOP_UPDATE = 4,
-        ACROSS_LOOP_LATE_UPDATE = 5
+        IN_LOOP_UPDATE,
+        IN_LOOP_LATE_UPDATE,
+        IN_LOOP_FIXED_UPDATE,
+        ACROSS_LOOP_UPDATE,
+        ACROSS_LOOP_LATE_UPDATE,
+        ACROSS_LOOP_FIXED_UPDATE
     }
 }

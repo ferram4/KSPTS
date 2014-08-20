@@ -53,9 +53,11 @@ namespace KSPThreadingSystem
             {
                 KSPTSTaskGroup tmpTaskGroup = tmpTaskGroupList[i];
                 object tmpObject = null;
-
                 if (tmpTaskGroup.preFunction != null)
+                {
                     tmpObject = tmpTaskGroup.preFunction();
+                    Debug.Log(i);
+                }
 
                 _updateThreadPool.EnqueueNewTask(tmpTaskGroup.threadedTask, tmpObject, tmpTaskGroup.postFunction, KSPTSThreadingGroups.IN_LOOP_UPDATE);
             }
@@ -63,13 +65,16 @@ namespace KSPThreadingSystem
 
         internal void EndUpdate()
         {
-            _updateThreadPool.SetUrgent(KSPTSThreadingGroups.IN_LOOP_UPDATE);
+            //_updateThreadPool.SetUrgent(KSPTSThreadingGroups.IN_LOOP_UPDATE);
 
             while(_updatePostFunctions.Count > 0)
             {
                 KSPTSParametrizedPostFunction tmp;
-                lock(locker)
+                lock (locker)
+                {
                     tmp = _updatePostFunctions.Dequeue();
+                    Monitor.Pulse(locker);
+                }
 
                 if (tmp.postFunction != null)
                     tmp.postFunction(tmp.parameter);
@@ -81,12 +86,15 @@ namespace KSPThreadingSystem
                 {
                     KSPTSParametrizedPostFunction tmp;
                     lock (locker)
+                    {
                         tmp = _updatePostFunctions.Dequeue();
+                        Monitor.Pulse(locker);
+                    }
 
                     if (tmp.postFunction != null)
                         tmp.postFunction(tmp.parameter);
                 }
-                Thread.Sleep(0);
+                //Thread.Sleep(0);
             }
         }
 
@@ -96,6 +104,7 @@ namespace KSPThreadingSystem
             lock(locker)
             {
                 _updatePostFunctions.Enqueue(tmpPostFunc);
+                Monitor.Pulse(locker);
             }
         }
 
@@ -147,6 +156,8 @@ namespace KSPThreadingSystem
             endOfFrameManagerGO.AddComponent<KSPTSEndOfFrameManager>();
 
             endOfFrameManager = endOfFrameManagerGO.GetComponent<KSPTSEndOfFrameManager>();
+
+            GameObject.DontDestroyOnLoad(endOfFrameManagerGO);
         }
 
         #endregion
