@@ -188,7 +188,6 @@ namespace KSPThreadingSystem
                 numPostFuncsRemaining--;
                 if (tmp.postFunction != null)
                     tmp.postFunction(tmp.parameter);
-
             }
         }
 

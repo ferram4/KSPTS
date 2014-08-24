@@ -5,7 +5,7 @@ using System.Threading;
 namespace KSPThreadingSystem
 {
     /// <summary>
-    /// A group of queues of tasks with set priorities for eahc queue; this ensures that
+    /// A group of queues of tasks with set priorities for each queue; this ensures that
     /// if a certain group fo tasks are causing the main thread to wait, they can be moved
     /// up to be rushed through the worker threads
     /// </summary>
