@@ -63,8 +63,16 @@ namespace KSPThreadingSystem
 
         void Update()
         {
+            //First, wait for all the ACROSS LOOP tasks from last time to finish
+            WaitForTheadingGroupToFinish(KSPTSThreadingGroup.ACROSS_LOOP_UPDATE);
+
             CheckIfEOFManagerNeedsResetting();
+
+            //Then, queue all the tasks needed to be finished by the end of this loop
             QueueThreadingGroupTasks(KSPTSThreadingGroup.IN_LOOP_UPDATE);
+
+            //Finally, queue all the tasks that are needed by the end of next loop
+            QueueThreadingGroupTasks(KSPTSThreadingGroup.ACROSS_LOOP_UPDATE);
         }
 
         internal void EndUpdate()
@@ -74,7 +82,14 @@ namespace KSPThreadingSystem
 
         void LateUpdate()
         {
+            //First, wait for all the ACROSS LOOP tasks from last time to finish
+            WaitForTheadingGroupToFinish(KSPTSThreadingGroup.ACROSS_LOOP_LATE_UPDATE);
+
+            //Then, queue all the tasks needed to be finished by the end of this loop
             QueueThreadingGroupTasks(KSPTSThreadingGroup.IN_LOOP_LATE_UPDATE);
+
+            //Finally, queue all the tasks that are needed by the end of next loop
+            QueueThreadingGroupTasks(KSPTSThreadingGroup.ACROSS_LOOP_LATE_UPDATE);
         }
 
         internal void EndLateUpdate()
@@ -84,7 +99,14 @@ namespace KSPThreadingSystem
 
         void FixedUpdate()
         {
+            //First, wait for all the ACROSS LOOP tasks from last time to finish
+            WaitForTheadingGroupToFinish(KSPTSThreadingGroup.ACROSS_LOOP_FIXED_UPDATE);
+
+            //Then, queue all the tasks needed to be finished by the end of this loop
             QueueThreadingGroupTasks(KSPTSThreadingGroup.IN_LOOP_FIXED_UPDATE);
+
+            //Finally, queue all the tasks that are needed by the end of next loop
+            QueueThreadingGroupTasks(KSPTSThreadingGroup.ACROSS_LOOP_FIXED_UPDATE);
         }
 
         internal void EndFixedUpdate()
