@@ -5,6 +5,8 @@ namespace KSPThreadingSystem
 {
     internal class KSPTSRegisteredTasks
     {
+        internal Dictionary<KSPTSThreadingGroup, List<KSPTSTaskGroup>> _groupTasks = new Dictionary<KSPTSThreadingGroup, List<KSPTSTaskGroup>>();
+
         internal KSPTSRegisteredTasks()
         {
             _groupTasks.Add(KSPTSThreadingGroup.IN_LOOP_UPDATE, new List<KSPTSTaskGroup>());
@@ -15,7 +17,14 @@ namespace KSPThreadingSystem
             _groupTasks.Add(KSPTSThreadingGroup.ACROSS_LOOP_FIXED_UPDATE, new List<KSPTSTaskGroup>());
         }
 
-        internal Dictionary<KSPTSThreadingGroup, List<KSPTSTaskGroup>> _groupTasks = new Dictionary<KSPTSThreadingGroup, List<KSPTSTaskGroup>>();
+        /// <summary>
+        /// Called on scene changes to ensure that all references to objects from the previous scene are removed; this prevents memory leaks
+        /// </summary>
+        internal void SceneChangeClearAllRegisteredTasks()
+        {
+            foreach (KeyValuePair<KSPTSThreadingGroup, List<KSPTSTaskGroup>> pair in _groupTasks)
+                pair.Value.Clear();
+        }
     }
 
     internal class KSPTSTaskGroup

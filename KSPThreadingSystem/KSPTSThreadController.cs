@@ -74,7 +74,6 @@ namespace KSPThreadingSystem
 
         void LateUpdate()
         {
-            CheckIfEOFManagerNeedsResetting();
             QueueThreadingGroupTasks(KSPTSThreadingGroup.IN_LOOP_LATE_UPDATE);
         }
 
@@ -176,8 +175,10 @@ namespace KSPThreadingSystem
                 lastScene = HighLogic.LoadedScene;
                 Debug.Log("KSPTSThreadController reporting; scene: " + HighLogic.LoadedScene.ToString());
                 ResetEndOfFrameManager();
+                registeredTasks.SceneChangeClearAllRegisteredTasks();
             }
 
+            //Since finding all GameObjects is somewhat expensive, only do this every 90 frames
             if (frameCount > 90)
             {
                 int tmpGOCount = Resources.FindObjectsOfTypeAll<GameObject>().Length;
