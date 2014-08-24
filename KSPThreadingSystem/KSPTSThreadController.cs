@@ -57,6 +57,13 @@ namespace KSPThreadingSystem
             _postFunctions.Add(KSPTSThreadingGroup.ACROSS_LOOP_LATE_UPDATE, new Queue<KSPTSParametrizedPostFunction>());
             _postFunctions.Add(KSPTSThreadingGroup.ACROSS_LOOP_FIXED_UPDATE, new Queue<KSPTSParametrizedPostFunction>());
 
+            _postFunctionsRemaining.Add(KSPTSThreadingGroup.IN_LOOP_UPDATE, 0);
+            _postFunctionsRemaining.Add(KSPTSThreadingGroup.IN_LOOP_LATE_UPDATE, 0);
+            _postFunctionsRemaining.Add(KSPTSThreadingGroup.IN_LOOP_FIXED_UPDATE, 0);
+            _postFunctionsRemaining.Add(KSPTSThreadingGroup.ACROSS_LOOP_UPDATE, 0);
+            _postFunctionsRemaining.Add(KSPTSThreadingGroup.ACROSS_LOOP_LATE_UPDATE, 0);
+            _postFunctionsRemaining.Add(KSPTSThreadingGroup.ACROSS_LOOP_FIXED_UPDATE, 0);
+
         }
 
         #region Unity Functions
