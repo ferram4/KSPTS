@@ -34,6 +34,14 @@ namespace KSPThreadingSystem
             }
         }
 
+        internal void SwapQueues(KSPTSThreadingGroup group1, KSPTSThreadingGroup group2)
+        {
+            lock(locker)
+            {
+                _tasks.SwapQueues(group1, group2);
+            }
+        }
+
         internal void SetUrgent(KSPTSThreadingGroup urgentGroup)
         {
             lock (locker)

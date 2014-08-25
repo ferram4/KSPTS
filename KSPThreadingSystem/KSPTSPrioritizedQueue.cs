@@ -27,6 +27,14 @@ namespace KSPThreadingSystem
             taskQueues.Add(KSPTSThreadingGroup.ACROSS_LOOP_FIXED_UPDATE, new Queue<KSPTSParametrizedTask>());
         }
 
+        //This is used for setting ACROSS_LOOP updates to finish by the end of the frame, but is set up to accept any switching
+        internal void SwapQueues(KSPTSThreadingGroup group1, KSPTSThreadingGroup group2)
+        {
+            Queue<KSPTSParametrizedTask> tmpQueue = taskQueues[group1];
+            taskQueues[group1] = taskQueues[group2];
+            taskQueues[group2] = tmpQueue;
+        }
+
         internal void SetUrgent(KSPTSThreadingGroup urgentGroup)
         {
             urgentQueue = urgentGroup;

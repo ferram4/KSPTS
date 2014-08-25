@@ -70,8 +70,9 @@ namespace KSPThreadingSystem
 
         void Update()
         {
-            //First, wait for all the ACROSS LOOP tasks from last time to finish
-            WaitForTheadingGroupToFinish(KSPTSThreadingGroup.ACROSS_LOOP_UPDATE);
+            //IN_LOOP will be empty, but ACROSS_LOOP will not.  Rather than waiting here for ACROSS_LOOP to finish,
+            //shift what it has over to IN_LOOP to give it until the end of the frame to finish
+            _threadPool.SwapQueues(KSPTSThreadingGroup.ACROSS_LOOP_UPDATE, KSPTSThreadingGroup.IN_LOOP_UPDATE);
 
             CheckIfEOFManagerNeedsResetting();
 
@@ -89,8 +90,10 @@ namespace KSPThreadingSystem
 
         void LateUpdate()
         {
-            //First, wait for all the ACROSS LOOP tasks from last time to finish
-            WaitForTheadingGroupToFinish(KSPTSThreadingGroup.ACROSS_LOOP_LATE_UPDATE);
+            //IN_LOOP will be empty, but ACROSS_LOOP will not.  Rather than waiting here for ACROSS_LOOP to finish,
+            //shift what it has over to IN_LOOP to give it until the end of the frame to finish
+            _threadPool.SwapQueues(KSPTSThreadingGroup.ACROSS_LOOP_LATE_UPDATE, KSPTSThreadingGroup.IN_LOOP_LATE_UPDATE);
+
 
             //Then, queue all the tasks needed to be finished by the end of this loop
             QueueThreadingGroupTasks(KSPTSThreadingGroup.IN_LOOP_LATE_UPDATE);
@@ -106,8 +109,10 @@ namespace KSPThreadingSystem
 
         void FixedUpdate()
         {
-            //First, wait for all the ACROSS LOOP tasks from last time to finish
-            WaitForTheadingGroupToFinish(KSPTSThreadingGroup.ACROSS_LOOP_FIXED_UPDATE);
+            //IN_LOOP will be empty, but ACROSS_LOOP will not.  Rather than waiting here for ACROSS_LOOP to finish,
+            //shift what it has over to IN_LOOP to give it until the end of the frame to finish
+            _threadPool.SwapQueues(KSPTSThreadingGroup.ACROSS_LOOP_FIXED_UPDATE, KSPTSThreadingGroup.IN_LOOP_FIXED_UPDATE);
+
 
             //Then, queue all the tasks needed to be finished by the end of this loop
             QueueThreadingGroupTasks(KSPTSThreadingGroup.IN_LOOP_FIXED_UPDATE);
