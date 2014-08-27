@@ -16,6 +16,8 @@ namespace KSPThreadingSystem
         private KSPTSThreadingGroup urgentQueue;
         private bool urgent = false;
 
+        private bool _hasTasks = false;
+
         internal KSPTSPrioritizedQueue()
         {
             //There has to be a cleaner way of doing this
@@ -44,9 +46,20 @@ namespace KSPThreadingSystem
         internal void Enqueue(KSPTSParametrizedTask newTask, KSPTSThreadingGroup group)
         {
             taskQueues[group].Enqueue(newTask);
+            _hasTasks = true;
         }
 
         internal bool hasTasks()
+        {
+            return _hasTasks;/*(taskQueues[KSPTSThreadingGroup.IN_LOOP_FIXED_UPDATE].Count > 0 ||
+                taskQueues[KSPTSThreadingGroup.ACROSS_LOOP_FIXED_UPDATE].Count > 0 ||
+                taskQueues[KSPTSThreadingGroup.IN_LOOP_UPDATE].Count > 0 ||
+                taskQueues[KSPTSThreadingGroup.IN_LOOP_LATE_UPDATE].Count > 0 ||
+                taskQueues[KSPTSThreadingGroup.ACROSS_LOOP_UPDATE].Count > 0 ||
+                taskQueues[KSPTSThreadingGroup.ACROSS_LOOP_LATE_UPDATE].Count > 0);*/
+        }
+
+        private bool privateTaskCheck()
         {
             return (taskQueues[KSPTSThreadingGroup.IN_LOOP_FIXED_UPDATE].Count > 0 ||
                 taskQueues[KSPTSThreadingGroup.ACROSS_LOOP_FIXED_UPDATE].Count > 0 ||
@@ -64,7 +77,11 @@ namespace KSPThreadingSystem
             {
                 tmpQueue = taskQueues[urgentQueue];
                 if (tmpQueue.Count > 0)
-                    return tmpQueue.Dequeue();
+                {
+                    returnVal = tmpQueue.Dequeue();
+                    _hasTasks = privateTaskCheck();
+                    return returnVal;
+                }
                 else
                     urgent = false;
             }
@@ -73,6 +90,7 @@ namespace KSPThreadingSystem
             if (tmpQueue.Count > 0)
             {
                 returnVal = tmpQueue.Dequeue();
+                _hasTasks = privateTaskCheck();
                 return returnVal;
             }
 
@@ -80,6 +98,7 @@ namespace KSPThreadingSystem
             if (tmpQueue.Count > 0)
             {
                 returnVal = tmpQueue.Dequeue();
+                _hasTasks = privateTaskCheck();
                 return returnVal;
             }
 
@@ -87,6 +106,7 @@ namespace KSPThreadingSystem
             if (tmpQueue.Count > 0)
             {
                 returnVal = tmpQueue.Dequeue();
+                _hasTasks = privateTaskCheck();
                 return returnVal;
             }
 
@@ -94,6 +114,7 @@ namespace KSPThreadingSystem
             if (tmpQueue.Count > 0)
             {
                 returnVal = tmpQueue.Dequeue();
+                _hasTasks = privateTaskCheck();
                 return returnVal;
             }
 
@@ -101,6 +122,7 @@ namespace KSPThreadingSystem
             if (tmpQueue.Count > 0)
             {
                 returnVal = tmpQueue.Dequeue();
+                _hasTasks = privateTaskCheck();
                 return returnVal;
             }
 
@@ -108,9 +130,10 @@ namespace KSPThreadingSystem
             if (tmpQueue.Count > 0)
             {
                 returnVal = tmpQueue.Dequeue();
+                _hasTasks = privateTaskCheck();
                 return returnVal;
             }
-            
+
             return null;
         }
     }
